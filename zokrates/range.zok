@@ -1,0 +1,4 @@
+def main(private field bid, field min) {
+    assert(bid > min);
+    return;
+}

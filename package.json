@@ -1,0 +1,23 @@
+{
+  "name": "hardhat",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.19"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "fs": "^0.0.1-security",
+    "fse": "^4.0.1",
+    "path": "^0.12.7",
+    "prompt-sync": "^4.2.0",
+    "zokrates-js": "^1.1.9"
+  }
+}

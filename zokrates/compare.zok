@@ -1,0 +1,30 @@
+import "hashes/sha256/512bitPacked" as sha256packed;
+
+def main(private field bid1, private field bid2, private field bid3, public field[2] a, public field[2] b, public field[2] c) -> (field, u32, field[2]){
+    field[2] h_bid1 = sha256packed([0,0,0,bid1]);
+    field[2] h_bid2 = sha256packed([0,0,0,bid2]);
+    field[2] h_bid3 = sha256packed([0,0,0,bid3]);
+
+    assert(h_bid1[0] == a[0]);
+    assert(h_bid1[1] == a[1]);
+    assert(h_bid2[0] == b[0]);
+    assert(h_bid2[1] == b[1]);
+    assert(h_bid3[0] == c[0]);
+    assert(h_bid3[1] == c[1]);
+
+    field[3] allBids = [bid1, bid2, bid3];
+    field[3][2] allHash = [a, b, c];
+    field mut highestBid = 0;
+    u32 mut position = 0;
+
+    for u32 i in 0..3 {
+        position = if allBids[i] > highestBid { i } else { position };
+        highestBid = if allBids[i] > highestBid { allBids[i] } else { highestBid };
+    }
+
+    assert(highestBid >= bid1);
+    assert(highestBid >= bid2);
+    assert(highestBid >= bid3);
+
+    return (highestBid, position, allHash[position]);
+}
