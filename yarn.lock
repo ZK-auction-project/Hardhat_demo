@@ -1679,6 +1679,11 @@ emoji-regex@^8.0.0:
   resolved "https://registry.npmjs.org/emoji-regex/-/emoji-regex-8.0.0.tgz"
   integrity sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==
 
+encrypt-rsa@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.npmjs.org/encrypt-rsa/-/encrypt-rsa-3.3.0.tgz"
+  integrity sha512-pIKuD2C/k9Vc5S7t4xMPVeXOE+rlXqzGotJc1yO0YLDr3DGy/jlnxhA2lxyvrEfO0J3R9bkl6vFby5Yd3ajNVA==
+
 enquirer@^2.3.0:
   version "2.4.1"
   resolved "https://registry.npmjs.org/enquirer/-/enquirer-2.4.1.tgz"

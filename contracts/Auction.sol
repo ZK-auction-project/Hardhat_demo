@@ -54,7 +54,7 @@ contract Auction {
 
     function endAuction(VerifierCompare.Proof memory proof, uint[10] memory input) onlyAuctioneer public{
         bool isValid = verifierCompare.verifyTx(proof, input);
-        require(isValid, "proof mai pass");
+        require(isValid, "proof not valid");
         uint position_winner;
 
         highestBid =  input[6]; 
