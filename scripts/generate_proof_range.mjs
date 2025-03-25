@@ -6,7 +6,7 @@ import fse from 'fs-extra'
 import promptSync from 'prompt-sync';
 
 const prompt = promptSync();
-
+export async function proof_range(input_1, input_2) {
 initialize().then(async (zokratesProvider) => {
 
     let rawdata = fs.readFileSync('./zokrates/range.zok');
@@ -15,9 +15,9 @@ initialize().then(async (zokratesProvider) => {
 
     const artifacts = zokratesProvider.compile(source);
 
-    const input_1 = prompt('input1 :');
+    // const input_1 = prompt('input1 :');
 
-    const input_2 = prompt('input2 :');
+    // const input_2 = prompt('input2 :');
 
     const { witness, output } = zokratesProvider.computeWitness(artifacts, [input_1, input_2]);
 
@@ -31,4 +31,4 @@ initialize().then(async (zokratesProvider) => {
     // fse.outputFile("./contracts/verifier_test.sol", verifier);
     // console.log(chalk.green("\nContracts generated successfully"));
 
-});
+});}
