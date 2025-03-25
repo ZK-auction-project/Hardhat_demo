@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "chalk": "^5.4.1",
+    "crypto-js": "^4.2.0",
     "encrypt-rsa": "^3.3.0",
     "fs": "^0.0.1-security",
     "fse": "^4.0.1",

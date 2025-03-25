@@ -5,14 +5,14 @@ const { buildModule } = require("@nomicfoundation/hardhat-ignition/modules");
 
 module.exports = buildModule("VerifierCompare", (m) => {
 
-  const verifier = m.contract("VerifierCompare");
+  const verifiers = m.contract("VerifierCompare");
   
-  return { verifier };
+  return { verifiers };
 });
 
 module.exports = buildModule("VerifierRange", (m) => {
 
   const verifier = m.contract("VerifierRange");
-  
+  console.log(verifier)
   return { verifier };
 });
