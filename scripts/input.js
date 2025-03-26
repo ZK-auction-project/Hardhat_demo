@@ -1,8 +1,26 @@
-import { proof_range } from "file:///C:/Users/Mon/Desktop/Hardhat_demo/scripts/generate_proof_range.mjs";
-import { proof_compare } from "file:///C:/Users/Mon/Desktop/Hardhat_demo/scripts/generate_proof_compare.mjs";
-import crypto from 'crypto';
+import { proof_range } from "./generate_proof_range.mjs";
+import { proof_compare } from "./generate_proof_compare.mjs";
+import crypto, { hash } from 'crypto';
 import promptSync from 'prompt-sync';
 const prompt = promptSync();
+
+const hexToByte = (hex) => {
+    const key = '0123456789abcdef'
+    let newBytes = []
+    let currentChar = 0
+    let currentByte = 0
+    for (let i=0; i<hex.length; i++) {   // Go over two 4-bit hex chars to convert into one 8-bit byte
+      currentChar = key.indexOf(hex[i])
+      if (i%2===0) { // First hex char
+        currentByte = (currentChar << 4) // Get 4-bits from first hex char
+      }
+      if (i%2===1) { // Second hex char
+        currentByte += (currentChar)     // Concat 4-bits from second hex char
+        newBytes.push(currentByte)       // Add byte
+      }
+    }
+    return new Uint8Array(newBytes)
+  }
 
 const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 512,
@@ -24,8 +42,8 @@ console.log('Private Key:', privateKey);
 //bidder1
 const bidder1 = prompt('bid_1 : ');
 
-const range = proof_range("2","0")
-const compare = proof_compare("5", "6", "7", ["263561599766550617289250058199814760685", "65303172752238645975888084098459749904"], ["296016139321527823785053958024045515449", "169585634993304848991863197817116667302"], ["62133134181886812829768166950054220896", "160635334427203623512968684759912538624"])
+// const range = proof_range("2","0")
+// const compare = proof_compare("5", "6", "7", ["263561599766550617289250058199814760685", "65303172752238645975888084098459749904"], ["296016139321527823785053958024045515449", "169585634993304848991863197817116667302"], ["62133134181886812829768166950054220896", "160635334427203623512968684759912538624"])
 
 // console.log(proof_range(2, 0));
 //bidder2
@@ -35,11 +53,26 @@ const bidder2 = prompt('bid_2 : ');
 const bidder3 = prompt('bid_3 : ');
 
 //end auction
-
-const bidderhash1 = crypto.createHash('sha256').update(bidder1).digest('hex');
-const bidderhash2 = crypto.createHash('sha256').update(bidder2).digest('hex');
-const bidderhash3 = crypto.createHash('sha256').update(bidder3).digest('hex');
+var bbb = bidder1.toString('hex').padStart(128, '0');
+console.log(bbb);
+const bidderhash1 = crypto.createHash('sha256').update(hexToByte(bbb)).digest('hex');
+const bidderhash2 = crypto.createHash('sha256').update(bidder2.padStart(128, '0')).digest('hex');
+const bidderhash3 = crypto.createHash('sha256').update(bidder3.padStart(128, '0')).digest('hex');
 
 console.log("Bidder 1 Hash:", bidderhash1);
 console.log("Bidder 2 Hash:", bidderhash2);
 console.log("Bidder 3 Hash:", bidderhash3);
+
+function hashHex(digest) {
+    const part1 = BigInt("0x" + digest.slice(0, 32));  
+    const part2 = BigInt("0x" + digest.slice(32));     
+
+    console.log(part1, part2);
+}
+
+hashHex(bidderhash1);
+// var p1, p2 = hashHex(bidderhash1);
+// console.log(p1,p2);
+
+
+// console.log(hexToByte(bbb))
