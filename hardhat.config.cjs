@@ -14,7 +14,7 @@ module.exports = {
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
-      gasLimit: 10000000,
+      gasLimit: 1000000000000000,
     },
   },
 };

@@ -83,9 +83,12 @@ async function startAuctionCLI() {
         try {
             const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
             const tx = await auctionContract.startAuction(publicKey, ethers.parseUnits(minBid, 0));
+            
             console.log("Address ผู้เปิดประมูล:", tx.from);
             console.log('กำลังเริ่มการประมูล...');
             await tx.wait();
+            // const m = await auctionContract.min_bid();
+            // console.log(m);
             console.log('เริ่มการประมูลเรียบร้อยแล้ว');
             console.log('Transaction Hash:', tx.hash);
             mainMenu();
@@ -102,7 +105,16 @@ async function bidCLI() {
         try {
             const encryptBid = crypto.publicEncrypt(publicKey, Buffer.from(bid)).toString('base64');
             const hashBid = makeHash(bid);
+            var proof;
+            await proof_range(bid, "0").then(range => {
+                proof = range;
+            });
+            // const proofFormatted = {a: {X:proof.proof.a[0], Y:proof.proof.a[1]}, b: {X:proof.proof.b[0], Y:proof.proof.b[1]}, c: {X:proof.proof.c[0], Y:proof.proof.c[1]}};
+            // 
+            const proofFormatted = [proof.proof.a, proof.proof.b, proof.proof.c]
+            const inputFormatted = proof.inputs;
             const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
+            console.log(proofFormatted, inputFormatted);
             const tx = await auctionContract.bidding(encryptBid, hashBid, proofFormatted, inputFormatted);
             console.log('กำลังส่ง Bid...');
             await tx.wait();

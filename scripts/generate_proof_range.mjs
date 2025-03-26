@@ -20,11 +20,11 @@ export async function proof_range(input_1, input_2) {
     const proof = zokratesProvider.generateProof(artifacts.program, witness, keypair.pk);
     fse.outputFile("./proofs/proof_range.json", JSON.stringify(proof));
     console.log(chalk.green("\nProofs generated successfully"));
-    const result = await [...proof.proof.a, ...proof.proof.b, ...proof.proof.c];
-    return result;
+    // const result = await [proof.proof.a, proof.proof.b, proof.proof.c, proof.inputs];
+    return proof;
 
     // const verifier = zokratesProvider.exportSolidityVerifier(keypair.vk, "v1");
-    // fse.outputFile("./contracts/verifier_test.sol", verifier);
+    // fse.outputFile("./contracts/verifier_range.sol", verifier);
     // console.log(chalk.green("\nContracts generated successfully"));
 
 

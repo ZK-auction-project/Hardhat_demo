@@ -21,8 +21,8 @@ initialize().then(async (zokratesProvider) => {
     fse.outputFile("./proofs/proof_compare.json", JSON.stringify(proof));
     console.log(chalk.green("\nProofs generated successfully"));
 
-    // const verifier = zokratesProvider.exportSolidityVerifier(keypair.vk, "v1");
-    // fse.outputFile("./contracts/verifier_test.sol", verifier);
-    // console.log(chalk.green("\nContracts generated successfully"));
+    const verifier = zokratesProvider.exportSolidityVerifier(keypair.vk, "v1");
+    fse.outputFile("./contracts/verifier_compare.sol", verifier);
+    console.log(chalk.green("\nContracts generated successfully"));
 
 });}
