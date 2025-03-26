@@ -1,4 +1,4 @@
-import {proof_range} from "./scripts/generate_proof_range.mjs"
+import { proof_range } from "./scripts/generate_proof_range.mjs"
 import { proof_compare } from "./scripts/generate_proof_compare.mjs"
 import crypto from 'crypto';
 import dotenv from 'dotenv';
@@ -23,6 +23,34 @@ const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
         format: 'pem'
     }
 });
+
+const hexToByte = (input) => {
+    const hex = input.toString('hex').padStart(128, '0')
+    const key = '0123456789abcdef'
+    let newBytes = []
+    let currentChar = 0
+    let currentByte = 0
+    for (let i = 0; i < hex.length; i++) {   // Go over two 4-bit hex chars to convert into one 8-bit byte
+        currentChar = key.indexOf(hex[i])
+        if (i % 2 === 0) { // First hex char
+            currentByte = (currentChar << 4) // Get 4-bits from first hex char
+        }
+        if (i % 2 === 1) { // Second hex char
+            currentByte += (currentChar)     // Concat 4-bits from second hex char
+            newBytes.push(currentByte)       // Add byte
+        }
+    }
+    return new Uint8Array(newBytes)
+}
+
+const makeHash = (input) => {
+    const byte = hexToByte(input);
+    const hash = crypto.createHash('sha256').update(byte).digest('hex');
+    const part1 = BigInt("0x" + hash.slice(0, 32)).toString();  
+    const part2 = BigInt("0x" + hash.slice(32)).toString();
+    const result = new Array(part1, part2);
+    return result;
+}
 
 const readline = createInterface({
     input: process.stdin,
@@ -55,7 +83,7 @@ async function startAuctionCLI() {
         try {
             const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
             const tx = await auctionContract.startAuction(publicKey, ethers.parseUnits(minBid, 0));
-            console.log("Address ผู้เปิดประมูล:" , tx.from);
+            console.log("Address ผู้เปิดประมูล:", tx.from);
             console.log('กำลังเริ่มการประมูล...');
             await tx.wait();
             console.log('เริ่มการประมูลเรียบร้อยแล้ว');
@@ -66,13 +94,14 @@ async function startAuctionCLI() {
             mainMenu();
         }
     });
-    
+
 }
 
 async function bidCLI() {
     readline.question('ป้อนราคา Bid ที่ต้องการ: ', async (bid) => {
         try {
-            encryptBid = crypto.publicEncrypt(publicKey, Buffer.from(bid)).toString('base64');
+            const encryptBid = crypto.publicEncrypt(publicKey, Buffer.from(bid)).toString('base64');
+            const hashBid = makeHash(bid);
             const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
             const tx = await auctionContract.bidding(encryptBid, hashBid, proofFormatted, inputFormatted);
             console.log('กำลังส่ง Bid...');
