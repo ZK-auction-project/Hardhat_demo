@@ -1,27 +1,31 @@
 const hre = require("hardhat");
+const fs = require('fs');
+const path = require('path');
 
 async function main() {
-  // Deploy VerifierRange contract
   const VerifierRange = await hre.ethers.getContractFactory("VerifierRange");
   const verifierRange = await VerifierRange.deploy();
   await verifierRange.waitForDeployment();
-  console.log("VerifierRange deployed to:", verifierRange.target);
+  const verifierRangeAddress = await verifierRange.getAddress(); // นี่คือจุดสำคัญ
 
-  // Deploy VerifierCompare contract
   const VerifierCompare = await hre.ethers.getContractFactory("VerifierCompare");
   const verifierCompare = await VerifierCompare.deploy();
   await verifierCompare.waitForDeployment();
-  console.log("VerifierCompare deployed to:", verifierCompare.target);
+  const verifierCompareAddress = await verifierCompare.getAddress(); // นี่คือจุดสำคัญ
 
-  // Deploy Auction contract, passing the addresses of the Verifier contracts
   const Auction = await hre.ethers.getContractFactory("Auction");
-  const auction = await Auction.deploy(verifierRange.target, verifierCompare.target);
+  const auction = await Auction.deploy(verifierRangeAddress, verifierCompareAddress);
   await auction.waitForDeployment();
-  console.log("Auction deployed to:", auction.target);
+  const auctionAddress = await auction.getAddress(); // นี่คือจุดสำคัญ
+
+  // เขียน address ลงในไฟล์ .env
+  const envPath = path.join(__dirname, '..', '.env');
+  const envContent = `AUCTION_CONTRACT_ADDRESS="${auctionAddress}"\nVERIFIER_RANGE_CONTRACT_ADDRESS="${verifierRangeAddress}"\nVERIFIER_COMPARE_CONTRACT_ADDRESS="${verifierCompareAddress}"\n`;
+
+  fs.writeFileSync(envPath, envContent);
+  console.log('\nContract addresses written to .env file');
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;

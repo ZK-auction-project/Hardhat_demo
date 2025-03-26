@@ -15,7 +15,9 @@
   "dependencies": {
     "chalk": "^5.4.1",
     "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.7",
     "encrypt-rsa": "^3.3.0",
+    "ethers": "^6.13.5",
     "fs": "^0.0.1-security",
     "fse": "^4.0.1",
     "path": "^0.12.7",
