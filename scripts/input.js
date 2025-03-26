@@ -36,10 +36,10 @@ const bidder3 = prompt('bid_3 : ');
 
 //end auction
 
-const hash1 = crypto.createHash('sha256').update(bidder1).digest('hex');
-const hash2 = crypto.createHash('sha256').update(bidder2).digest('hex');
-const hash3 = crypto.createHash('sha256').update(bidder3).digest('hex');
+const bidderhash1 = crypto.createHash('sha256').update(bidder1).digest('hex');
+const bidderhash2 = crypto.createHash('sha256').update(bidder2).digest('hex');
+const bidderhash3 = crypto.createHash('sha256').update(bidder3).digest('hex');
 
-console.log("Bidder 1 Hash:", hash1);
-console.log("Bidder 2 Hash:", hash2);
-console.log("Bidder 3 Hash:", hash3);
+console.log("Bidder 1 Hash:", bidderhash1);
+console.log("Bidder 2 Hash:", bidderhash2);
+console.log("Bidder 3 Hash:", bidderhash3);
