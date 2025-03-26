@@ -1,12 +1,28 @@
+import {proof_range} from "./scripts/generate_proof_range.mjs"
+import { proof_compare } from "./scripts/generate_proof_compare.mjs"
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 import { createInterface } from 'readline';
 import { ethers } from 'ethers';
-import AuctionArtifact from './artifacts/contracts/Auction.sol/Auction.json' assert { type: 'json' };
-import VerifierRangeArtifact from './artifacts/contracts/Verifier.sol/VerifierRange.json' assert { type: 'json' };
-import VerifierCompareArtifact from './artifacts/contracts/Verifier.sol/VerifierCompare.json' assert { type: 'json' };
+import AuctionArtifact from './artifacts/contracts/Auction.sol/Auction.json' with { type: 'json' };
+import VerifierRangeArtifact from './artifacts/contracts/Verifier.sol/VerifierRange.json' with { type: 'json' };
+import VerifierCompareArtifact from './artifacts/contracts/Verifier.sol/VerifierCompare.json' with { type: 'json' };
 
 dotenv.config();
+
 console.log("Starting readlineCLI.js...");
+
+const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    modulusLength: 512,
+    publicKeyEncoding: {
+        type: 'spki',
+        format: 'pem'
+    },
+    privateKeyEncoding: {
+        type: 'pkcs8',
+        format: 'pem'
+    }
+});
 
 const readline = createInterface({
     input: process.stdin,
@@ -35,29 +51,28 @@ async function getContract(contractName, contractAddress) {
 }
 
 async function startAuctionCLI() {
-    readline.question('ป้อน Public Key ของผู้จัดประมูล: ', async (publicKey) => {
-        readline.question('ป้อนราคาเริ่มต้นขั้นต่ำ: ', async (minBid) => {
-            try {
-                const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
-                const tx = await auctionContract.startAuction(publicKey, ethers.parseUnits(minBid, 0));
-                const eiei = await auctionContract.auctioneer;
-                console.log(eiei);
-                console.log('กำลังเริ่มการประมูล...');
-                await tx.wait();
-                console.log('เริ่มการประมูลเรียบร้อยแล้ว');
-                console.log('Transaction Hash:', tx.hash);
-                mainMenu();
-            } catch (error) {
-                console.error('เกิดข้อผิดพลาดในการเริ่มการประมูล:', error);
-                mainMenu();
-            }
-        });
+    readline.question('ป้อนราคาเริ่มต้นขั้นต่ำ: ', async (minBid) => {
+        try {
+            const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
+            const tx = await auctionContract.startAuction(publicKey, ethers.parseUnits(minBid, 0));
+            console.log("Address ผู้เปิดประมูล:" , tx.from);
+            console.log('กำลังเริ่มการประมูล...');
+            await tx.wait();
+            console.log('เริ่มการประมูลเรียบร้อยแล้ว');
+            console.log('Transaction Hash:', tx.hash);
+            mainMenu();
+        } catch (error) {
+            console.error('เกิดข้อผิดพลาดในการเริ่มการประมูล:', error);
+            mainMenu();
+        }
     });
+    
 }
 
 async function bidCLI() {
-    readline.question('ป้อนราคา Bid ที่ต้องการ: ', async (encryptBid) => {
+    readline.question('ป้อนราคา Bid ที่ต้องการ: ', async (bid) => {
         try {
+            encryptBid = crypto.publicEncrypt(publicKey, Buffer.from(bid)).toString('base64');
             const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
             const tx = await auctionContract.bidding(encryptBid, hashBid, proofFormatted, inputFormatted);
             console.log('กำลังส่ง Bid...');
