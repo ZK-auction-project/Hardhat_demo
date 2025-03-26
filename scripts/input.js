@@ -34,15 +34,23 @@ console.log(enc_bid1)
 
 //bidder2
 const bidder2 = prompt('bid_2 : ');
-const enc_bid2 = crypto.publicEncrypt(publicKey, Buffer.from(bidder1)).toString('base64');
+const enc_bid2 = crypto.publicEncrypt(publicKey, Buffer.from(bidder2)).toString('base64');
 console.log(enc_bid2)
 
 //bidder3
 const bidder3 = prompt('bid_3 : ');
-const enc_bid3 = crypto.publicEncrypt(publicKey, Buffer.from(bidder1)).toString('base64');
+const enc_bid3 = crypto.publicEncrypt(publicKey, Buffer.from(bidder3)).toString('base64');
 console.log(enc_bid3)
 
 //end auction
-const winner = base64ToArrayBuffer(enc_bid1)
-const dec_bid1 = crypto.privateDecrypt(privateKey, winner).toString();
+var buffer = base64ToArrayBuffer(enc_bid1)
+const dec_bid1 = crypto.privateDecrypt(privateKey, buffer).toString();
 console.log(dec_bid1)
+
+var buffer = base64ToArrayBuffer(enc_bid2)
+const dec_bid2 = crypto.privateDecrypt(privateKey, buffer).toString();
+console.log(dec_bid2)
+
+var buffer = base64ToArrayBuffer(enc_bid3)
+const dec_bid3 = crypto.privateDecrypt(privateKey, buffer).toString();
+console.log(dec_bid3)
