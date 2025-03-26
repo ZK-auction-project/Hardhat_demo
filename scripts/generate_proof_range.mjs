@@ -3,7 +3,6 @@ import chalk from "chalk"
 import fs from "fs"
 import path from "path"
 import fse from 'fs-extra'
-import promptSync from 'prompt-sync';
 
 export async function proof_range(input_1, input_2) {
     initialize().then(async (zokratesProvider) => {

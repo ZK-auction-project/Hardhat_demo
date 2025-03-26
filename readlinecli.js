@@ -5,7 +5,6 @@ import AuctionArtifact from './artifacts/contracts/Auction.sol/Auction.json' ass
 import VerifierRangeArtifact from './artifacts/contracts/Verifier.sol/VerifierRange.json' assert { type: 'json' };
 import VerifierCompareArtifact from './artifacts/contracts/Verifier.sol/VerifierCompare.json' assert { type: 'json' };
 
-
 dotenv.config();
 console.log("Starting readlineCLI.js...");
 
@@ -41,6 +40,8 @@ async function startAuctionCLI() {
             try {
                 const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
                 const tx = await auctionContract.startAuction(publicKey, ethers.parseUnits(minBid, 0));
+                const eiei = await auctionContract.auctioneer;
+                console.log(eiei);
                 console.log('กำลังเริ่มการประมูล...');
                 await tx.wait();
                 console.log('เริ่มการประมูลเรียบร้อยแล้ว');
