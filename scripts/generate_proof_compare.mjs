@@ -4,7 +4,7 @@ import fs from "fs"
 import path from "path"
 import fse from 'fs-extra'
 
-
+export async function proof_compare(bit1,bit2,bit3,hash_bit1,hash_bit2,hash_bit3) {
 initialize().then(async (zokratesProvider) => {
 
     let rawdata = fs.readFileSync('./zokrates/compare.zok');
@@ -13,7 +13,7 @@ initialize().then(async (zokratesProvider) => {
 
     const artifacts = zokratesProvider.compile(source);
 
-    const { witness, output } = zokratesProvider.computeWitness(artifacts, ["5", "6", "7", ["263561599766550617289250058199814760685", "65303172752238645975888084098459749904"], ["296016139321527823785053958024045515449", "169585634993304848991863197817116667302"], ["62133134181886812829768166950054220896", "160635334427203623512968684759912538624"]]);
+    const { witness, output } = zokratesProvider.computeWitness(artifacts, [bit1,bit2,bit3,hash_bit1,hash_bit2,hash_bit3]);
 
     const keypair = zokratesProvider.setup(artifacts.program);
 
@@ -25,4 +25,4 @@ initialize().then(async (zokratesProvider) => {
     // fse.outputFile("./contracts/verifier_test.sol", verifier);
     // console.log(chalk.green("\nContracts generated successfully"));
 
-});
+});}
