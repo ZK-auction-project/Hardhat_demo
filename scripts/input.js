@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import promptSync from 'prompt-sync';
 const prompt = promptSync();
 
-proof_range("2", "0").then(range => {
+proof_range("3", "0").then(range => {
     // const kuy =  range.slice(0,3)
     // console.log(kuy);
     // console.log(range.slice(3)[0])

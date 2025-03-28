@@ -18,15 +18,15 @@ export async function proof_range(input_1, input_2) {
     const { witness, output } = zokratesProvider.computeWitness(artifacts, [input_1, input_2]);
 
     
-    const keypair = zokratesProvider.setup(artifacts.program);
+    // const keypair = zokratesProvider.setup(artifacts.program);
 
-    //เขียนไฟล์ลง env
+    // //เขียนไฟล์ลง env
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
     const envPath = path.join(__dirname, '..', 'provingKey.env');
-    const envContent = `PROVING_KEY="${keypair.pk}"`
+    // const envContent = `PROVING_KEY="${keypair.pk}"`
     dotenv.config({path : envPath})
-    fs.writeFileSync(envPath, envContent);
+    // fs.writeFileSync(envPath, envContent);
 
     //ดึง Proovingkey จาก env
     const provingKeyRaw = process.env.PROVING_KEY;
@@ -35,24 +35,21 @@ export async function proof_range(input_1, input_2) {
     const provingKeyUint8Array = new Uint8Array(provingKeyInt)
     const proof = zokratesProvider.generateProof(artifacts.program, witness, provingKeyUint8Array);
 
-    fse.outputFile("./proofs/proving.key", keypair.pk.toString());
-    
 
     fse.outputFile("./proofs/proof_range.json", JSON.stringify(proof));
     console.log(chalk.green("\nProofs generated successfully"));
 
-    const isVerified = zokratesProvider.verify(keypair.vk, proof);
-    console.log(chalk.green("เป็นควยไร"));
+    // const isVerified = zokratesProvider.verify(keypair.vk, proof);
+    // console.log(chalk.green("เป็นควยไร"));
     // const result = await [proof.proof.a, proof.proof.b, proof.proof.c, proof.inputs];
     
 
-    const verifier = zokratesProvider.exportSolidityVerifier(keypair.vk, "v1");
-    fse.outputFile("./contracts/verifier_range.sol", verifier);
-    console.log(chalk.green("\nContracts generated successfully"));
+    // const verifier = zokratesProvider.exportSolidityVerifier(keypair.vk, "v1");
+    // fse.outputFile("./contracts/verifier_range.sol", verifier);
+    // console.log(chalk.green("\nContracts generated successfully"));
     return proof;
 }
-proof_range("2", "0");
-
+proof_range("6", "0");
 // import { initialize } from 'zokrates-js';
 // import chalk from 'chalk';
 // import fs from 'fs';
