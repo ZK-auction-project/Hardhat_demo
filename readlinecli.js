@@ -87,8 +87,8 @@ async function startAuctionCLI() {
             console.log("Address ผู้เปิดประมูล:", tx.from);
             console.log('กำลังเริ่มการประมูล...');
             await tx.wait();
-            // const m = await auctionContract.min_bid();
-            // console.log(m);
+            const m = await auctionContract.min_bid();
+            console.log(m);
             console.log('เริ่มการประมูลเรียบร้อยแล้ว');
             console.log('Transaction Hash:', tx.hash);
             mainMenu();
@@ -103,11 +103,14 @@ async function startAuctionCLI() {
 async function bidCLI() {
     readline.question('ป้อนราคา Bid ที่ต้องการ: ', async (bid) => {
         try {
+            const auctionContract1 = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
             const encryptBid = crypto.publicEncrypt(publicKey, Buffer.from(bid)).toString('base64');
             const hashBid = makeHash(bid);
+            const min = await auctionContract1.min_bid();
             var proof;
-            await proof_range(bid, "0").then(range => {
-                proof = range;
+            console.log(bid)
+            await proof_range(bid, min.toString()).then(range => {
+                proof = range; 
             });
             // const proofFormatted = {a: {X:proof.proof.a[0], Y:proof.proof.a[1]}, b: {X:proof.proof.b[0], Y:proof.proof.b[1]}, c: {X:proof.proof.c[0], Y:proof.proof.c[1]}};
             // 

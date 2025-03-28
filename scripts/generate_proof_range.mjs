@@ -16,19 +16,23 @@ export async function proof_range(input_1, input_2) {
     const { witness, output } = zokratesProvider.computeWitness(artifacts, [input_1, input_2]);
 
     const keypair = zokratesProvider.setup(artifacts.program);
+    fse.outputFile("./proofs/proving.key", keypair.pk.toString());
 
     const proof = zokratesProvider.generateProof(artifacts.program, witness, keypair.pk);
     fse.outputFile("./proofs/proof_range.json", JSON.stringify(proof));
     console.log(chalk.green("\nProofs generated successfully"));
+
+    const isVerified = zokratesProvider.verify(keypair.vk, proof);
+    console.log(chalk.green("เป็นควยไร"));
     // const result = await [proof.proof.a, proof.proof.b, proof.proof.c, proof.inputs];
+    
+
+    const verifier = zokratesProvider.exportSolidityVerifier(keypair.vk, "v1");
+    fse.outputFile("./contracts/verifier_range.sol", verifier);
+    console.log(chalk.green("\nContracts generated successfully"));
     return proof;
-
-    // const verifier = zokratesProvider.exportSolidityVerifier(keypair.vk, "v1");
-    // fse.outputFile("./contracts/verifier_range.sol", verifier);
-    // console.log(chalk.green("\nContracts generated successfully"));
-
-
 }
+proof_range("2", "0");
 
 // import { initialize } from 'zokrates-js';
 // import chalk from 'chalk';
