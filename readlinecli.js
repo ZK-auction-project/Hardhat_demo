@@ -7,8 +7,15 @@ import { ethers } from 'ethers';
 import AuctionArtifact from './artifacts/contracts/Auction.sol/Auction.json' with { type: 'json' };
 import VerifierRangeArtifact from './artifacts/contracts/Verifier.sol/VerifierRange.json' with { type: 'json' };
 import VerifierCompareArtifact from './artifacts/contracts/Verifier.sol/VerifierCompare.json' with { type: 'json' };
+import { fileURLToPath } from 'url';
+import path from "path";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.join(__dirname, '..', 'contractInfo.env');
+dotenv.config({path : envPath});
+const AUCTION_CONTRACT_ADDRESS = process.env.AUCTION_CONTRACT_ADDRESS;
+const HARDHAT_NODE_URL = 'http://127.0.0.1:8545';
 
 console.log("Starting readlineCLI.js...");
 
@@ -57,10 +64,6 @@ const readline = createInterface({
     output: process.stdout,
 });
 
-const AUCTION_CONTRACT_ADDRESS = process.env.AUCTION_CONTRACT_ADDRESS;
-const VERIFIER_RANGE_CONTRACT_ADDRESS = process.env.VERIFIER_RANGE_CONTRACT_ADDRESS;
-const VERIFIER_COMPARE_CONTRACT_ADDRESS = process.env.VERIFIER_COMPARE_CONTRACT_ADDRESS;
-const HARDHAT_NODE_URL = 'http://127.0.0.1:8545';
 
 async function getContract(contractName, contractAddress) {
     const provider = new ethers.JsonRpcProvider(HARDHAT_NODE_URL);
@@ -87,8 +90,8 @@ async function startAuctionCLI() {
             console.log("Address ผู้เปิดประมูล:", tx.from);
             console.log('กำลังเริ่มการประมูล...');
             await tx.wait();
-            const m = await auctionContract.min_bid();
-            console.log(m);
+            // const m = await auctionContract.min_bid();
+            // console.log(m);
             console.log('เริ่มการประมูลเรียบร้อยแล้ว');
             console.log('Transaction Hash:', tx.hash);
             mainMenu();
@@ -103,21 +106,17 @@ async function startAuctionCLI() {
 async function bidCLI() {
     readline.question('ป้อนราคา Bid ที่ต้องการ: ', async (bid) => {
         try {
-            const auctionContract1 = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
+            const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
             const encryptBid = crypto.publicEncrypt(publicKey, Buffer.from(bid)).toString('base64');
             const hashBid = makeHash(bid);
-            const min = await auctionContract1.min_bid();
+            const minBid = await auctionContract.min_bid();
             var proof;
-            console.log(bid)
-            await proof_range(bid, min.toString()).then(range => {
-                proof = range; 
+            await proof_range(minBid.toString(),bid).then(range => {
+                console.log("🔍 Proof Generated:", range);
+                proof = range;
             });
-            // const proofFormatted = {a: {X:proof.proof.a[0], Y:proof.proof.a[1]}, b: {X:proof.proof.b[0], Y:proof.proof.b[1]}, c: {X:proof.proof.c[0], Y:proof.proof.c[1]}};
-            // 
             const proofFormatted = [proof.proof.a, proof.proof.b, proof.proof.c]
             const inputFormatted = proof.inputs;
-            const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
-            console.log(proofFormatted, inputFormatted);
             const tx = await auctionContract.bidding(encryptBid, hashBid, proofFormatted, inputFormatted);
             console.log('กำลังส่ง Bid...');
             await tx.wait();

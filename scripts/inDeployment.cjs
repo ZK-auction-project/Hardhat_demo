@@ -6,20 +6,19 @@ async function main() {
   const VerifierRange = await hre.ethers.getContractFactory("VerifierRange");
   const verifierRange = await VerifierRange.deploy();
   await verifierRange.waitForDeployment();
-  const verifierRangeAddress = await verifierRange.getAddress(); // นี่คือจุดสำคัญ
+  const verifierRangeAddress = await verifierRange.getAddress();
 
   const VerifierCompare = await hre.ethers.getContractFactory("VerifierCompare");
   const verifierCompare = await VerifierCompare.deploy();
   await verifierCompare.waitForDeployment();
-  const verifierCompareAddress = await verifierCompare.getAddress(); // นี่คือจุดสำคัญ
+  const verifierCompareAddress = await verifierCompare.getAddress();
 
   const Auction = await hre.ethers.getContractFactory("Auction");
   const auction = await Auction.deploy(verifierRangeAddress, verifierCompareAddress);
   await auction.waitForDeployment();
-  const auctionAddress = await auction.getAddress(); // นี่คือจุดสำคัญ
+  const auctionAddress = await auction.getAddress();
 
-  // เขียน address ลงในไฟล์ .env
-  const envPath = path.join(__dirname, '..', '.env');
+  const envPath = path.join(__dirname, '..', 'contractInfo.env');
   const envContent = `AUCTION_CONTRACT_ADDRESS="${auctionAddress}"\nVERIFIER_RANGE_CONTRACT_ADDRESS="${verifierRangeAddress}"\nVERIFIER_COMPARE_CONTRACT_ADDRESS="${verifierCompareAddress}"\n`;
 
   fs.writeFileSync(envPath, envContent);
