@@ -12,12 +12,14 @@ import path from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const envPath = path.join(__dirname, '..', 'contractInfo.env');
+const envPath = path.join(__dirname, 'contractInfo.env');
 dotenv.config({path : envPath});
 const AUCTION_CONTRACT_ADDRESS = process.env.AUCTION_CONTRACT_ADDRESS;
 const HARDHAT_NODE_URL = 'http://127.0.0.1:8545';
 
 console.log("Starting readlineCLI.js...");
+
+let currentSignerIndex = 0;
 
 const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 512,
@@ -30,6 +32,15 @@ const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
         format: 'pem'
     }
 });
+
+function base64ToArrayBuffer(base64) {
+    var binaryString = atob(base64);
+    var bytes = new Uint8Array(binaryString.length);
+    for (var i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
 
 const hexToByte = (input) => {
     const hex = input.toString('hex').padStart(128, '0')
@@ -64,9 +75,9 @@ const readline = createInterface({
     output: process.stdout,
 });
 
-
 async function getContract(contractName, contractAddress) {
     const provider = new ethers.JsonRpcProvider(HARDHAT_NODE_URL);
+
     let artifact;
     if (contractName === 'Auction') {
         artifact = AuctionArtifact;
@@ -77,7 +88,8 @@ async function getContract(contractName, contractAddress) {
     } else {
         throw new Error(`Unknown contract name: ${contractName}`);
     }
-    const signer = await provider.getSigner();
+    const signer = await provider.getSigner(currentSignerIndex)
+    console.log(signer)
     return new ethers.Contract(contractAddress, artifact.abi, signer);
 }
 
@@ -90,8 +102,6 @@ async function startAuctionCLI() {
             console.log("Address ผู้เปิดประมูล:", tx.from);
             console.log('กำลังเริ่มการประมูล...');
             await tx.wait();
-            // const m = await auctionContract.min_bid();
-            // console.log(m);
             console.log('เริ่มการประมูลเรียบร้อยแล้ว');
             console.log('Transaction Hash:', tx.hash);
             mainMenu();
@@ -111,11 +121,11 @@ async function bidCLI() {
             const hashBid = makeHash(bid);
             const minBid = await auctionContract.min_bid();
             var proof;
-            await proof_range(minBid.toString(),bid).then(range => {
+            await proof_range(bid , minBid.toString()).then(range => {
                 console.log("🔍 Proof Generated:", range);
                 proof = range;
             });
-            const proofFormatted = [proof.proof.a, proof.proof.b, proof.proof.c]
+            const proofFormatted = proof.proof;
             const inputFormatted = proof.inputs;
             const tx = await auctionContract.bidding(encryptBid, hashBid, proofFormatted, inputFormatted);
             console.log('กำลังส่ง Bid...');
@@ -130,9 +140,50 @@ async function bidCLI() {
     });
 }
 
+async function changeSigner(){
+    return new Promise((resolve)=>{
+        readline.question('ป้อนเลขกระเป๋าของคุณ: ', async (signerIndexInput) =>{
+            console.log("เปลี่ยนกระเป๋าเเล้ว");
+            const signerInt = parseInt(signerIndexInput)
+            currentSignerIndex = signerInt;
+        resolve();
+        })
+    })
+}
+
 async function endAuctionCLI() {
     try {
         const auctionContract = await getContract('Auction', AUCTION_CONTRACT_ADDRESS);
+
+        const bidder1 = await auctionContract.bidders(0);
+        var bids = await auctionContract.bids(bidder1);
+        const enc_bid1 = bids.encrypt_bid;
+        const hash_bid1 = [bids.hash_bid1.toString(), bids.hash_bid2.toString()];
+        var buffer = base64ToArrayBuffer(enc_bid1)
+        const dec_bid1 = crypto.privateDecrypt(privateKey, buffer).toString();
+
+        const bidder2 = await auctionContract.bidders(1);
+        var bids = await auctionContract.bids(bidder2);
+        const enc_bid2 = bids.encrypt_bid;
+        const hash_bid2 = [bids.hash_bid1.toString(), bids.hash_bid2.toString()];
+        var buffer = base64ToArrayBuffer(enc_bid2)
+        const dec_bid2 = crypto.privateDecrypt(privateKey, buffer).toString();
+
+        const bidder3 = await auctionContract.bidders(2);
+        var bids = await auctionContract.bids(bidder3);
+        const enc_bid3 = bids.encrypt_bid;
+        const hash_bid3 = [bids.hash_bid1.toString(), bids.hash_bid2.toString()];
+        var buffer = base64ToArrayBuffer(enc_bid3)
+        const dec_bid3 = crypto.privateDecrypt(privateKey, buffer).toString();
+
+        var proof;
+        await proof_compare(dec_bid1, dec_bid2, dec_bid3, hash_bid1, hash_bid2, hash_bid3).then(compare => {
+            console.log("🔍 Proof Generated:", compare);
+            proof = compare;
+        });
+
+        const proofFormatted = proof.proof;
+        const inputFormatted = proof.inputs;
 
         const tx = await auctionContract.endAuction(proofFormatted, inputFormatted);
         console.log('กำลังสิ้นสุดการประมูล...');
@@ -142,11 +193,11 @@ async function endAuctionCLI() {
 
         const highestBid = await auctionContract.highestBid();
         const winner = await auctionContract.winner();
-        const highestHash = await auctionContract.highestHash();
+        // const highestHash = await auctionContract.highestHash();
 
         console.log('ผู้ชนะการประมูล:', winner);
         console.log('ราคาประมูลสูงสุด:', ethers.formatUnits(highestBid, 0));
-        console.log('Hash ของ Bid สูงสุด:', highestHash);
+        // console.log('Hash ของ Bid สูงสุด:', highestHash);
         mainMenu();
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในการสิ้นสุดการประมูล:', error);
@@ -158,9 +209,10 @@ function mainMenu() {
     console.log('\n===== เมนูหลัก =====');
     console.log('1. เริ่มการประมูล');
     console.log('2. ส่ง Bid');
-    console.log('3. สิ้นสุดการประมูล');
+    console.log('3. เปลี่ยนกระเป๋า')
+    console.log('4. สิ้นสุดการประมูล');
     console.log('0. ออก');
-    readline.question('เลือกคำสั่ง: ', (choice) => {
+    readline.question('เลือกคำสั่ง: ', async (choice) => {
         switch (choice) {
             case '1':
                 startAuctionCLI();
@@ -169,6 +221,10 @@ function mainMenu() {
                 bidCLI();
                 break;
             case '3':
+                await changeSigner();
+                mainMenu();
+                break;
+            case '4':
                 endAuctionCLI();
                 break;
             case '0':

@@ -6,7 +6,8 @@ import "./Verifier.sol";
 contract Auction {
     struct Bid {
         string encrypt_bid;
-        uint256[2] hash_bid;
+        uint256 hash_bid1;
+        uint256 hash_bid2;
     }
 
     uint256 public highestBid;
@@ -46,7 +47,8 @@ contract Auction {
         require(verifierRange.verifyTx(proof, input), "lower than min bid");
         Bid memory bid = Bid({
             encrypt_bid: _encrypt_bid,
-            hash_bid: _hash_bid
+            hash_bid1: _hash_bid[0],
+            hash_bid2: _hash_bid[1]
         });
         bids[msg.sender] = bid; 
         bidders.push(msg.sender);
@@ -61,7 +63,7 @@ contract Auction {
         position_winner = input[7];
         highestHash = [input[8], input[9]];
 
-        if (bids[bidders[position_winner]].hash_bid[0] == highestHash[0] && bids[bidders[position_winner]].hash_bid[1] == highestHash[1]){
+        if (bids[bidders[position_winner]].hash_bid1 == highestHash[0] && bids[bidders[position_winner]].hash_bid2 == highestHash[1]){
             winner = bidders[position_winner];
         }
     }
