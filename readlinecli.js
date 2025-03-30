@@ -89,7 +89,7 @@ async function getContract(contractName, contractAddress) {
         throw new Error(`Unknown contract name: ${contractName}`);
     }
     const signer = await provider.getSigner(currentSignerIndex)
-    console.log(signer)
+    // console.log(signer)
     return new ethers.Contract(contractAddress, artifact.abi, signer);
 }
 
@@ -132,6 +132,7 @@ async function bidCLI() {
             await tx.wait();
             console.log('ส่ง Bid เรียบร้อยแล้ว');
             console.log('Transaction Hash:', tx.hash);
+            console.log("Address ผู้ส่ง Bid:", tx.from);
             mainMenu();
         } catch (error) {
             console.error('เกิดข้อผิดพลาดในการส่ง Bid:', error);
@@ -146,6 +147,9 @@ async function changeSigner(){
             console.log("เปลี่ยนกระเป๋าเเล้ว");
             const signerInt = parseInt(signerIndexInput)
             currentSignerIndex = signerInt;
+            const provider = new ethers.JsonRpcProvider(HARDHAT_NODE_URL);
+            const signer = await provider.getSigner(currentSignerIndex)
+            console.log("เลขกระเป๋าปัจจุบัน:", signer.address)
         resolve();
         })
     })
@@ -175,6 +179,10 @@ async function endAuctionCLI() {
         const hash_bid3 = [bids.hash_bid1.toString(), bids.hash_bid2.toString()];
         var buffer = base64ToArrayBuffer(enc_bid3)
         const dec_bid3 = crypto.privateDecrypt(privateKey, buffer).toString();
+
+        console.log("Address ผู้เข้าร่วมคนที่ 1:", bidder1);
+        console.log("Address ผู้เข้าร่วมคนที่ 2:", bidder2);
+        console.log("Address ผู้เข้าร่วมคนที่ 3:", bidder3);
 
         var proof;
         await proof_compare(dec_bid1, dec_bid2, dec_bid3, hash_bid1, hash_bid2, hash_bid3).then(compare => {
